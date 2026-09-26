@@ -1471,11 +1471,44 @@ function buildSummaryMessage() {
 function sendToCedric() {
     lastSummaryMessage = buildSummaryMessage();
 
-    // Kopieer naar clipboard
-    navigator.clipboard.writeText(lastSummaryMessage).catch(() => {});
+    // Robuust kopiëren
+    copyToClipboard(lastSummaryMessage);
 
     // Toon bevestigingspagina
     showConfirmationPage();
+}
+
+function copyToClipboard(text) {
+    // Eerst moderne API proberen
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(() => {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.top = "-9999px";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+
+    textarea.focus();
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
+    try {
+        document.execCommand("copy");
+    } catch (e) {
+        // Laatste redmiddel: prompt
+        prompt("Kopieer handmatig:", text);
+    }
+
+    document.body.removeChild(textarea);
 }
 
 function showConfirmationPage() {
@@ -1529,51 +1562,42 @@ function showConfirmationPage() {
 
 
 function openCedricInstagram() {
-    navigator.clipboard.writeText(lastSummaryMessage).catch(() => {});
+    copyToClipboard(lastSummaryMessage);
 
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
+    const url = `https://www.instagram.com/${CEDRIC_INSTAGRAM}/`;
+
     if (isMobile) {
-        // Probeer eerst de directe chat-link
-        window.location.href = `https://ig.me/m/${CEDRIC_INSTAGRAM}`;
-
-        // Fallback: open app op profiel
+        window.location.href = `instagram://user?username=${CEDRIC_INSTAGRAM}`;
         setTimeout(() => {
-            window.location.href = `instagram://user?username=${CEDRIC_INSTAGRAM}`;
+            window.location.href = url;
         }, 1200);
-
-        // Laatste fallback: website
-        setTimeout(() => {
-            window.open(`https://www.instagram.com/${CEDRIC_INSTAGRAM}/`, "_blank");
-        }, 2500);
     } else {
-        // PC: probeer ig.me, anders profiel
-        window.open(`https://ig.me/m/${CEDRIC_INSTAGRAM}`, "_blank");
+        // PC: gebruik location.href ipv window.open (geen popup-blocker)
+        window.location.href = url;
     }
 }
 
 function shareWhatsApp() {
     const msg = encodeURIComponent(lastSummaryMessage);
-    window.open(`https://wa.me/?text=${msg}`, "_blank");
+    window.location.href = `https://wa.me/?text=${msg}`;
 }
 
 function shareInstagram() {
-    navigator.clipboard.writeText(lastSummaryMessage).then(() => {
-        alert(
-            "📋 Bericht gekopieerd!\n\n" +
-            "Open Instagram en plak het in de chat waar je het wil delen."
-        );
-    }).catch(() => {
-        alert("Kon niet kopiëren. Kopieer het handmatig uit de samenvatting.");
-    });
+    copyToClipboard(lastSummaryMessage);
+
+    setTimeout(() => {
+        alert("📋 Bericht gekopieerd!\n\nOpen Instagram en plak het in de chat waar je het wil delen.");
+    }, 200);
 }
 
 function copySummaryAgain() {
-    navigator.clipboard.writeText(lastSummaryMessage).then(() => {
-        alert("📋 Bericht opnieuw gekopieerd!");
-    }).catch(() => {
-        alert(lastSummaryMessage);
-    });
+    copyToClipboard(lastSummaryMessage);
+
+    setTimeout(() => {
+        alert("📋 Bericht gekopieerd! (" + lastSummaryMessage.length + " tekens)");
+    }, 200);
 }
 
 function launchConfetti() {
