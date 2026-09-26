@@ -40,6 +40,50 @@ let footballMatch = false;
 const STORAGE_KEY = "ella_date_state_v1";
 let currentPage = "start";
 
+// ── Achtergrondmuziek ──
+let musicPlaying = false;
+let musicStarted = false;
+
+function startMusic() {
+    const audio = document.getElementById("bg-music");
+    if (!audio) return;
+
+    audio.volume = 0.35; // zacht
+    audio.play().then(() => {
+        musicPlaying = true;
+        musicStarted = true;
+        updateMusicButton();
+    }).catch(() => {
+        // Autoplay geblokkeerd → wacht op user interaction
+        musicPlaying = false;
+        updateMusicButton();
+    });
+}
+
+function toggleMusic() {
+    const audio = document.getElementById("bg-music");
+    if (!audio) return;
+
+    if (musicPlaying) {
+        audio.pause();
+        musicPlaying = false;
+    } else {
+        audio.volume = 0.35;
+        audio.play().then(() => {
+            musicPlaying = true;
+            musicStarted = true;
+        }).catch(() => {});
+    }
+
+    updateMusicButton();
+}
+
+function updateMusicButton() {
+    const btn = document.getElementById("music-toggle");
+    if (!btn) return;
+    btn.textContent = musicPlaying ? "🔊" : "🔇";
+}
+
 function saveState() {
     const state = {
         selectedDaysData,
@@ -267,6 +311,7 @@ function sayYes() {
     const container = document.querySelector(".container");
     container.style.opacity = "0";
     createHeartExplosion();
+    startMusic();
 
     setTimeout(() => {
         renderDaysPage();
