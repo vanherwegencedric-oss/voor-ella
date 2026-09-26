@@ -709,6 +709,19 @@ function selectLocationType(type) {
     goToLocations();
 }
 
+function selectCityForDay(city) {
+    const loc = selectedLocationData[currentLocationDate];
+    loc.type = "Andere stad";
+    loc.city = city;
+
+    if (city !== "Andere stad") {
+        loc.customCity = "";
+    }
+
+    saveState();
+    goToLocations();
+}
+
 function saveCustomCityForDay(textarea) {
     const loc = selectedLocationData[currentLocationDate];
     loc.customCity = textarea.value.trim();

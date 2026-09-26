@@ -948,3 +948,47 @@ body {
         transform: translateY(0);
     }
 }
+
+#open-instagram-now {
+    margin-top: 25px;
+    border: none;
+    border-radius: 30px;
+    padding: 15px 35px;
+    background: linear-gradient(135deg, #ff69ad, #ff3f9b);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.2s ease;
+    box-shadow: 0 8px 20px rgba(255, 20, 147, 0.25);
+}
+
+#open-instagram-now:hover {
+    transform: scale(1.05);
+}
+
+.paste-info {
+    margin-top: 25px;
+    padding: 18px;
+    background: #fff5f9;
+    border: 2px dashed #ffb1c9;
+    border-radius: 20px;
+    text-align: left;
+    color: #9c4770;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.paste-info p {
+    margin: 6px 0;
+    font-size: 0.95rem;
+    color: #9c4770;
+}
+
+.paste-info strong {
+    color: #d63384;
+}
