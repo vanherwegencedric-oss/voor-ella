@@ -639,7 +639,14 @@ function goToLocations() {
         </button>
     `;
 
-        refreshLocationState();
+                refreshLocationState();
+
+    // Event listeners voor de stad-knoppen
+    document.querySelectorAll(".city-card").forEach(card => {
+        card.addEventListener("click", function() {
+            selectCityForDay(this.dataset.city);
+        });
+    });
 
     setCurrentPage("locations");
 }
@@ -661,11 +668,12 @@ function renderCityOptions() {
     return `
         <p style="margin-top: 20px;">Welke stad?</p>
 
-        <div class="activity-grid">
+        <div class="activity-grid" id="city-grid">
             ${cities.map(([icon, city]) => `
                 <button
-                    class="activity-card ${selectedCity === city ? "selected" : ""}"
-                    onclick="selectCityForDay('${city}')">
+                    type="button"
+                    class="activity-card city-card ${selectedCity === city ? "selected" : ""}"
+                    data-city="${city}">
                     <span>${icon}</span>
                     <strong>${city}</strong>
                 </button>
@@ -730,16 +738,6 @@ function refreshLocationState() {
 
     const nextButton = document.getElementById("next-location");
     if (nextButton) nextButton.disabled = !allFilled;
-}
-
-function selectLocation(button) {
-    document.querySelectorAll(".location-card")
-        .forEach(card => card.classList.remove("selected"));
-
-    button.classList.add("selected");
-
-    selectedLocation =
-        button.querySelector("strong").textContent;
 }
 
 function goToFood() {
@@ -1398,9 +1396,23 @@ return `
             ${daysHTML}
         </div>
 
-                <button id="confirm-date" onclick="sendToCedric()">
-    📸 Verstuur naar Cédric via Instagram
-</button>
+                       <button id="confirm-date" onclick="sendToCedric()">
+            📸 Verstuur naar Cédric via Instagram
+        </button>
+
+        <div class="paste-info">
+            <p><strong>💡 Wat gebeurt er als je klikt?</strong></p>
+            <p style="margin: 8px 0;">Je bericht wordt automatisch <strong>gekopieerd</strong>. Daarna opent Instagram. Daar moet je het nog even <strong>plakken</strong>.</p>
+            <p style="margin: 8px 0;"><strong>Zo doe je het:</strong></p>
+            <p style="margin: 4px 0 4px 15px; font-size: 0.9rem;">
+                1️⃣ Instagram opent<br>
+                2️⃣ Ga naar de chat met Cédric<br>
+                3️⃣ <strong>Tik in het tekstvak</strong><br>
+                4️⃣ <strong>Houd je vinger ingedrukt</strong><br>
+                5️⃣ Kies <strong>"Plakken"</strong><br>
+                6️⃣ Verzenden 💗
+            </p>
+        </div>
     `;
 
     setCurrentPage("summary");
@@ -1446,16 +1458,11 @@ function buildSummaryMessage() {
 function sendToCedric() {
     lastSummaryMessage = buildSummaryMessage();
 
-    // Kopieer alvast naar clipboard
+    // Kopieer naar clipboard
     navigator.clipboard.writeText(lastSummaryMessage).catch(() => {});
 
     // Toon bevestigingspagina
     showConfirmationPage();
-
-    // Open Instagram DM na korte delay
-    setTimeout(() => {
-        window.open(`https://ig.me/m/${CEDRIC_INSTAGRAM}`, "_blank");
-    }, 400);
 }
 
 function showConfirmationPage() {
@@ -1467,38 +1474,53 @@ function showConfirmationPage() {
 
         <p>Made for Ella 💗</p>
 
-        <h1>Verstuurd! 🥰</h1>
+        <h1>Klaar! 🥰</h1>
 
-        <p>
-            Je bericht is gekopieerd.<br>
-            Plak het in het Instagram-venster dat net is opengegaan.
-        </p>
-
-        <p style="font-size: 0.95rem; opacity: 0.8;">
-            (Lukt het niet? Open Instagram, ga naar Cédric zijn DM,
-            en plak het bericht daar.)
+                    <p>
+            Je bericht is <strong>gekopieerd</strong>! 📋<br>
+            Klik hieronder om verder te gaan.
         </p>
 
         <div class="share-buttons">
 
-            <button id="share-whatsapp" onclick="shareWhatsApp()">
-                💬 Deel via WhatsApp
-            </button>
-
-            <button id="share-instagram" onclick="shareInstagram()">
-                📸 Deel via Instagram
+                        <button id="send-cedric" onclick="openCedricInstagram()">
+                📸 Open Instagram van Cédric
             </button>
 
             <button id="copy-message" onclick="copySummaryAgain()">
-                📋 Kopieer bericht nog eens
+                📋 Kopieer bericht (opnieuw)
+            </button>
+
+            <button id="share-whatsapp" onclick="shareWhatsApp()">
+                💬 Liever via WhatsApp
             </button>
 
         </div>
 
-       <button id="close-page" onclick="resetAll()">
-    ↺ Opnieuw beginnen
-</button>
+        <button id="close-page" onclick="resetAll()">
+            ↺ Opnieuw beginnen
+        </button>
     `;
+}
+
+
+function openCedricInstagram() {
+    // Eerst kopiëren zodat het zeker in het klembord zit
+    navigator.clipboard.writeText(lastSummaryMessage).catch(() => {});
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile) {
+        // Op mobiel: open direct de Instagram-app op Cedric's profiel
+        window.location.href = `instagram://user?username=${CEDRIC_INSTAGRAM}`;
+
+        setTimeout(() => {
+            window.open(`https://www.instagram.com/${CEDRIC_INSTAGRAM}/`, "_blank");
+        }, 900);
+    } else {
+        // Op desktop: open Instagram DM-pagina
+        window.open(`https://www.instagram.com/direct/new/`, "_blank");
+    }
 }
 
 function shareWhatsApp() {
@@ -1604,35 +1626,4 @@ function saveAvailabilityNote(textarea) {
     availabilityNotes[date] = textarea.value;
 
     saveState();
-}
-
-
-
-function saveCustomActivity() {
-
-    const input =
-        document.getElementById("custom-activity-input");
-
-    if (!input.value.trim()) {
-        return;
-    }
-
-    customActivity = input.value.trim();
-
-    alert("Activiteit opgeslagen: " + customActivity);
-}
-
-function saveCustomCity() {
-
-    const input =
-        document.getElementById("custom-city-input");
-
-    if (!input.value.trim()) {
-        return;
-    }
-
-    selectedActivity = "Uitstap stad";
-    customActivity = input.value.trim();
-
-    alert("Stad gekozen: " + customActivity);
 }
