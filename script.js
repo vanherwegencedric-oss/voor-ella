@@ -1489,14 +1489,25 @@ function showConfirmationPage() {
 
         <h1>Klaar! 🥰</h1>
 
-                    <p>
+                     <p>
             Je bericht is <strong>gekopieerd</strong>! 📋<br>
             Klik hieronder om verder te gaan.
         </p>
 
+        <div class="paste-info">
+            <p><strong>📸 Op Instagram:</strong></p>
+            <p style="margin-left: 15px; font-size: 0.9rem;">
+                1️⃣ Je komt op Cédric zijn <strong>profiel</strong><br>
+                2️⃣ Klik op de knop <strong>"Message"</strong><br>
+                3️⃣ <strong>Tik in het tekstvak</strong><br>
+                4️⃣ <strong>Houd vast</strong> → kies <strong>"Plakken"</strong><br>
+                5️⃣ Verzenden 💗
+            </p>
+        </div>
+
         <div class="share-buttons">
 
-                        <button id="send-cedric" onclick="openCedricInstagram()">
+            <button id="send-cedric" onclick="openCedricInstagram()">
                 📸 Open Instagram van Cédric
             </button>
 
@@ -1518,21 +1529,26 @@ function showConfirmationPage() {
 
 
 function openCedricInstagram() {
-    // Eerst kopiëren zodat het zeker in het klembord zit
     navigator.clipboard.writeText(lastSummaryMessage).catch(() => {});
 
     const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     if (isMobile) {
-        // Op mobiel: open direct de Instagram-app op Cedric's profiel
-        window.location.href = `instagram://user?username=${CEDRIC_INSTAGRAM}`;
+        // Probeer eerst de directe chat-link
+        window.location.href = `https://ig.me/m/${CEDRIC_INSTAGRAM}`;
 
+        // Fallback: open app op profiel
+        setTimeout(() => {
+            window.location.href = `instagram://user?username=${CEDRIC_INSTAGRAM}`;
+        }, 1200);
+
+        // Laatste fallback: website
         setTimeout(() => {
             window.open(`https://www.instagram.com/${CEDRIC_INSTAGRAM}/`, "_blank");
-        }, 900);
+        }, 2500);
     } else {
-        // Op desktop: open Instagram DM-pagina
-        window.open(`https://www.instagram.com/direct/new/`, "_blank");
+        // PC: probeer ig.me, anders profiel
+        window.open(`https://ig.me/m/${CEDRIC_INSTAGRAM}`, "_blank");
     }
 }
 
